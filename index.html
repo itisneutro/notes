@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0D0D12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MyNotes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <title>MyNotes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-top">
+        <div class="header-left">
+          <div class="date-label" id="dateLabel"></div>
+          <div class="section-title">
+            <span class="section-icon" id="sectionIcon"></span>
+            <span id="sectionName"></span>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <svg class="progress-svg" viewBox="0 0 52 52">
+            <circle class="progress-bg" cx="26" cy="26" r="21"/>
+            <circle class="progress-ring" id="progressRing" cx="26" cy="26" r="21"/>
+          </svg>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+      </div>
+
+      <!-- Date navigator (tasks / homework) -->
+      <div class="date-nav" id="dateNav">
+        <button class="date-nav-arrow" id="datePrev">‹</button>
+        <div class="date-nav-days" id="dateNavDays"></div>
+        <button class="date-nav-arrow" id="dateNext">›</button>
+      </div>
+
+      <!-- Workout history nav -->
+      <div class="workout-nav" id="workoutNav">
+        <button class="wk-nav-btn" id="wkPrev">‹ Пред.</button>
+        <span class="wk-date-label" id="wkDateLabel"></span>
+        <button class="wk-nav-btn" id="wkNext">След. ›</button>
+      </div>
+    </header>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <span class="stat"><span class="dot dot-active">●</span> <span id="statActive">0</span> активных</span>
+      <span class="stat-div"></span>
+      <span class="stat"><span class="dot dot-done">●</span> <span id="statDone">0</span> выполнено</span>
+      <button class="clear-btn" id="clearDoneBtn">очистить ✕</button>
+    </div>
+
+    <!-- LIST -->
+    <div class="list" id="itemList"></div>
+
+    <!-- INPUT -->
+    <div class="input-row">
+      <input class="main-input" id="mainInput" placeholder="Добавить..." />
+      <button class="add-btn" id="addBtn">+</button>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-item" data-tab="tasks">
+        <span class="nav-icon">✦</span>
+        <span class="nav-label">Задачи</span>
+        <span class="nav-badge" id="badge-tasks"></span>
+      </button>
+      <button class="nav-item" data-tab="workout">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Тренировка</span>
+        <span class="nav-badge" id="badge-workout"></span>
+      </button>
+      <button class="nav-item" data-tab="homework">
+        <span class="nav-icon">◆</span>
+        <span class="nav-label">Домашка</span>
+        <span class="nav-badge" id="badge-homework"></span>
+      </button>
+      <button class="nav-item" data-tab="notes">
+        <span class="nav-icon">◇</span>
+        <span class="nav-label">Заметки</span>
+        <span class="nav-badge" id="badge-notes"></span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
