@@ -119,13 +119,13 @@ function render() {
   $('sectionIcon').style.color = cat.color;
   $('sectionName').textContent = cat.label;
 
-  // Видимость даты и календаря
+// Видимость даты и календаря
   if (cat.hasDateNav) {
     $('dateLabel').textContent = fmtFull(selectedDate).replace(/^./, c => c.toUpperCase());
-    $('calendarBtn').style.display = 'block';
+    $('calendarContainer').style.display = 'block'; // Показываем контейнер
   } else {
     $('dateLabel').textContent = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, c => c.toUpperCase());
-    $('calendarBtn').style.display = 'none'; // Скрываем календарь в заметках
+    $('calendarContainer').style.display = 'none'; // Скрываем контейнер в заметках
   }
 
   // Подписи тренировок
@@ -271,9 +271,6 @@ mainInput.addEventListener('keydown', e => {
 
 // ── Clear done ────────────────────────────────
 clearBtn.addEventListener('click', clearDone);
-
-// ── Управление календарем ─────────────────────
-$('calendarBtn').addEventListener('click', () => $('datePicker').showPicker());
 
 $('datePicker').addEventListener('change', (e) => {
   if (e.target.value) {
