@@ -1,16 +1,59 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 :root {
-  --bg: #0D0D12;
-  --surface: rgba(255,255,255,0.05);
-  --border: rgba(255,255,255,0.07);
-  --text: rgba(255,255,255,0.9);
-  --muted: rgba(255,255,255,0.35);
-  --accent: #FF6B35;
+  --bg: #000000;
+  --surface: rgba(255, 255, 255, 0.08); /* Эффект стекла */
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --text: #FFFFFF;
+  --muted: rgba(255, 255, 255, 0.5);
+  --accent: #00D4AA; /* Цвет морской волны для свежести */
   --font-display: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* Эффект жидкого стекла для карточек и инпутов */
+.item, .main-input, .workout-nav, .day-chip, .bottom-nav {
+  background: var(--surface) !important;
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Улучшенный календарь */
+.calendar-container {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background: var(--surface);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+}
+
+.calendar-icon {
+  font-size: 16px;
+  opacity: 1;
+}
+
+.date-picker-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0;
+  z-index: 10;
+  -webkit-appearance: none;
+}
+
+/* Плавный переход при выборе даты */
+.day-chip {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+}
+.day-chip.active {
+  transform: scale(1.1);
+  background: var(--accent) !important;
+  border-color: rgba(255,255,255,0.4) !important;
 }
 
 html, body { height: 100%; background: var(--bg); overflow: hidden; }
