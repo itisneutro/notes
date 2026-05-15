@@ -1,4 +1,4 @@
-const CACHE = 'mynotes-v5';
+const CACHE = 'mynotes-v6';
 const FILES = [
   '/notes/',
   '/notes/index.html',
