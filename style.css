@@ -1,6 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-/* 1. Возвращаем твои оригинальные красивые цвета */
 :root {
   --bg: #0D0D12;
   --surface: rgba(255,255,255,0.05);
@@ -13,51 +12,6 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 }
-
-/* 2. УБИРАЕМ ПРЫЖКИ ДАТ (Никакого scale!) */
-.day-chip {
-  flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center;
-  padding: 6px 10px; border-radius: 12px; cursor: pointer; border: none;
-  background: var(--surface); gap: 2px; 
-  transition: background 0.2s, border-color 0.2s; /* Плавная смена цвета без скачков размера */
-}
-.day-chip.active { background: var(--accent); }
-
-/* 3. НАСТОЯЩЕЕ ПЛАВАЮЩЕЕ СТЕКЛО (Глайдер в меню) */
-.bottom-nav {
-  display: flex;
-  position: relative;
-  padding: 6px 6px calc(var(--safe-bottom) + 10px);
-  background: rgba(13,13,18,0.8);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-top: 1px solid var(--border);
-  touch-action: none; /* Запрещаем дергаться экрану при свайпе меню */
-}
-
-/* Сам ползунок-стекло */
-.nav-glider {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  height: calc(100% - var(--safe-bottom) - 16px);
-  width: calc((100% - 12px) / 4); /* Ширина ровно на 1 вкладку */
-  background: rgba(255, 255, 255, 0.15); /* Матовое стекло */
-  border-radius: 12px;
-  z-index: 1;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1); /* Эппловская пружинистость */
-  pointer-events: none;
-}
-
-.nav-item {
-  flex: 1; background: none; border: none;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 8px 4px; cursor: pointer; border-radius: 12px; 
-  position: relative; z-index: 2; /* Кнопки поверх ползунка */
-}
-/* Убираем старый фон, так как теперь под кнопкой ездит глайдер */
-.nav-item.active { background: transparent; }
 
 html, body { height: 100%; background: var(--bg); overflow: hidden; }
 
@@ -105,7 +59,6 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
 
 /* ── DATE NAV И КАЛЕНДАРЬ ── */
 .date-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; position: relative; }
-.date-label { margin-bottom: 0; font-size: 11px; color: var(--muted); text-transform: capitalize; letter-spacing: 0.06em; font-family: var(--font-body); font-weight: 500; }
 .calendar-container { position: relative; width: 22px; height: 22px; margin-top: -2px; }
 .calendar-icon { position: absolute; top: 0; left: 0; font-size: 14px; opacity: 0.7; pointer-events: none; }
 .date-picker-overlay { 
@@ -139,7 +92,7 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
   flex-shrink: 0;
   display: flex; flex-direction: column; align-items: center;
   padding: 6px 10px; border-radius: 12px; cursor: pointer; border: none;
-  background: var(--surface); gap: 2px; transition: all 0.2s;
+  background: var(--surface); gap: 2px; transition: background 0.2s, border-color 0.2s;
 }
 .day-chip.active { background: var(--accent); }
 .day-chip.today { border: 1px solid var(--accent); }
@@ -149,6 +102,7 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
 .day-chip.active .dc-d { color: #000; }
 .day-chip .dc-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 .day-chip.active .dc-dot { background: rgba(0,0,0,0.4); }
+
 /* ── STATS ── */
 .stats-bar {
   display: flex; align-items: center; gap: 8px;
