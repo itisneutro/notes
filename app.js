@@ -272,12 +272,20 @@ mainInput.addEventListener('keydown', e => {
 // ── Clear done ────────────────────────────────
 clearBtn.addEventListener('click', clearDone);
 
+// В самом низу app.js
 $('datePicker').addEventListener('change', (e) => {
   if (e.target.value) {
     selectedDate = e.target.value;
-    // Сдвигаем ленту дат, чтобы выбранный день был по центру
-    const diffDays = Math.round((parseKey(selectedDate) - parseKey(today())) / (1000 * 60 * 60 * 24));
-    dateWindowStart = diffDays - 3;
+    
+    // Вычисляем разницу в днях от сегодня, чтобы центрировать ленту
+    const selected = new Date(selectedDate);
+    const now = new Date();
+    const diffTime = selected - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Центрируем: показываем 3 дня до выбранной даты
+    dateWindowStart = diffDays - 3; 
+    
     render();
   }
 });
