@@ -1,5 +1,11 @@
-const CACHE = 'mynotes-v1';
-const FILES = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
+const CACHE = 'mynotes-v2'; // v2 обязательно, чтобы сбросить старый сломанный кэш!
+const FILES = [
+  '/notes/',
+  '/notes/index.html',
+  '/notes/style.css',
+  '/notes/app.js',
+  '/notes/manifest.json'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
@@ -15,6 +21,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/notes/index.html')))
   );
 });
