@@ -318,3 +318,41 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 24px rgba(0,0,0,0.4);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* workout date-pick modal */
+.wk-pick-modal {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.wk-pick-modal.open { opacity: 1; pointer-events: all; }
+.wk-pick-inner {
+  width: 100%; max-width: 430px;
+  background: rgba(18,18,28,0.92);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8); backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(255,255,255,0.13); border-bottom: none;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.16), 0 -8px 40px rgba(0,0,0,0.6);
+  border-radius: 24px 24px 0 0;
+  padding: 16px 16px calc(var(--safe-bottom) + 20px);
+}
+.wk-pick-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 12px; text-align: center; }
+.wk-pick-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.wk-pick-nav button { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: var(--text); font-size: 17px; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.wk-pick-month { flex: 1; text-align: center; font-size: 13px; font-weight: 600; font-family: var(--font-display); text-transform: capitalize; }
+.wk-pick-wds { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 6px; }
+.wk-pick-wds span { text-align: center; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.wk-pick-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.wk-pick-day {
+  aspect-ratio: 1; border-radius: 10px; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text); font-size: 13px; font-weight: 600; font-family: var(--font-display);
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.wk-pick-day.empty { background: none; border: none; cursor: default; }
+.wk-pick-day.today { border-color: var(--accent); color: var(--accent); }
+.wk-pick-day.has-workout { position: relative; }
+.wk-pick-day.has-workout::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.wk-pick-day:not(.empty):active { background: var(--accent); color: #000; transform: scale(0.9); }
+.wk-pick-cancel { width: 100%; margin-top: 10px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); padding: 11px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
