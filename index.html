@@ -140,5 +140,19 @@
 
 <script src="app.js"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+  <!-- Workout date-pick modal -->
+<div class="wk-pick-modal" id="wkPickModal">
+  <div class="wk-pick-inner">
+    <div class="wk-pick-title">Скопировать тренировку на дату</div>
+    <div class="wk-pick-nav">
+      <button id="wkPickPrev">‹</button>
+      <span class="wk-pick-month" id="wkPickMonth"></span>
+      <button id="wkPickNext">›</button>
+    </div>
+    <div class="wk-pick-wds"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+    <div class="wk-pick-days" id="wkPickDays"></div>
+    <button class="wk-pick-cancel" id="wkPickCancel">Отмена</button>
+  </div>
+</div>
 </body>
 </html>
