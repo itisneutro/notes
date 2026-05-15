@@ -24,11 +24,16 @@
     <header class="header">
       <div class="header-top">
         <div class="header-left">
-          <div class="date-label" id="dateLabel"></div>
+          <div class="date-wrapper" id="dateWrapper">
+            <div class="date-label" id="dateLabel"></div>
+            <button id="calendarBtn" class="calendar-btn">📅</button>
+            <input type="date" id="datePicker" class="date-picker-hidden" />
+          </div>
           <div class="section-title">
             <span class="section-icon" id="sectionIcon"></span>
             <span id="sectionName"></span>
           </div>
+          <input type="text" id="workoutTitle" class="workout-title-input" placeholder="Название дня (напр. Спина/Грудь)..." />
         </div>
         <div class="progress-wrap">
           <svg class="progress-svg" viewBox="0 0 52 52">
@@ -39,21 +44,13 @@
         </div>
       </div>
 
-      <!-- Date navigator (tasks / homework) -->
       <div class="date-nav" id="dateNav">
         <button class="date-nav-arrow" id="datePrev">‹</button>
         <div class="date-nav-days" id="dateNavDays"></div>
         <button class="date-nav-arrow" id="dateNext">›</button>
       </div>
-
-      <!-- Workout history nav -->
-      <div class="workout-nav" id="workoutNav">
-        <button class="wk-nav-btn" id="wkPrev">‹ Пред.</button>
-        <span class="wk-date-label" id="wkDateLabel"></span>
-        <button class="wk-nav-btn" id="wkNext">След. ›</button>
-      </div>
     </header>
-
+    
     <!-- STATS BAR -->
     <div class="stats-bar">
       <span class="stat"><span class="dot dot-active">●</span> <span id="statActive">0</span> активных</span>
