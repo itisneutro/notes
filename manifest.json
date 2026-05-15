@@ -2,7 +2,7 @@
   "name": "MyNotes",
   "short_name": "MyNotes",
   "description": "Личный органайзер — задачи, тренировки, домашка",
-  "start_url": "/",
+  "start_url": "/notes/",
   "display": "standalone",
   "background_color": "#0D0D12",
   "theme_color": "#0D0D12",
