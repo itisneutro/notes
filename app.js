@@ -3,11 +3,12 @@
 // ─────────────────────────────────────────────
 
 const STORAGE_KEY = 'mynotes_v3';
+// Теперь у workout тоже есть dateNav!
 const CATS = {
-  tasks:   { label: 'Задачи',     icon: '✦', color: '#FF6B35', hasDateNav: true,    hasWorkoutNav: false },
-  workout: { label: 'Тренировка', icon: '◈', color: '#00D4AA', hasDateNav: false,   hasWorkoutNav: true  },
-  homework:{ label: 'Домашка',    icon: '◆', color: '#A78BFA', hasDateNav: true,    hasWorkoutNav: false },
-  notes:   { label: 'Заметки',    icon: '◇', color: '#F59E0B', hasDateNav: false,   hasWorkoutNav: false },
+  tasks:   { label: 'Задачи',     icon: '✦', color: '#FF6B35', hasDateNav: true },
+  workout: { label: 'Тренировка', icon: '◈', color: '#00D4AA', hasDateNav: true },
+  homework:{ label: 'Домашка',    icon: '◆', color: '#A78BFA', hasDateNav: true },
+  notes:   { label: 'Заметки',    icon: '◇', color: '#F59E0B', hasDateNav: false },
 };
 
 // ── helpers ──────────────────────────────────
@@ -22,19 +23,20 @@ function addDays(dateStr, n) {
 function parseKey(k) { const [y,m,d] = k.split('-'); return new Date(+y, +m-1, +d); }
 function fmtWeekday(k) { return parseKey(k).toLocaleDateString('ru-RU', { weekday: 'short' }); }
 function fmtFull(k)    { return parseKey(k).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }); }
-function fmtShort(k)   { return parseKey(k).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); }
 
 // ── state ─────────────────────────────────────
 let state = loadState();
 let activeTab = 'tasks';
-let selectedDate = today();         // for tasks / homework
-let workoutOffset = 0;              // 0 = today, -1 = yesterday, etc.
-let workoutDates = [];              // sorted list of dates that have workout data
+let selectedDate = today();         
 let editingId = null;
-let dateWindowStart = -3;           // how many days ago the date window starts
+let dateWindowStart = -3;           
 
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || makeDefault(); }
+  try { 
+    let s = JSON.parse(localStorage.getItem(STORAGE_KEY)) || makeDefault(); 
+    if (!s.workoutTitles) s.workoutTitles = {}; // Миграция для старых сохранений
+    return s;
+  }
   catch { return makeDefault(); }
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -42,57 +44,31 @@ function makeDefault() {
   const t = today();
   return {
     tasks: { [t]: [{ id: uid(), text: 'Пример задачи', done: false }] },
-    workout: { [t]: [{ id: uid(), text: 'Жим лёжа — 3×8 × 80кг', done: false }, { id: uid(), text: 'Приседания — 4×6 × 100кг', done: false }] },
+    workout: { [t]: [{ id: uid(), text: 'Жим лёжа — 3×8 × 80кг', done: false }] },
+    workoutTitles: {},
     homework: { [t]: [{ id: uid(), text: 'Математика — параграф 12', done: false }] },
     notes: [{ id: uid(), text: 'Пример заметки', done: false }],
   };
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
-// ── current items getter ───────────────────────
+// ── current items getter & setter ─────────────
 function currentItems() {
-  if (activeTab === 'notes') return state.notes;
-  if (activeTab === 'workout') {
-    const d = workoutCurrentDate();
-    return (state.workout[d] || []);
-  }
-  // tasks / homework — by selectedDate
+  if (activeTab === 'notes') return state.notes || [];
   return (state[activeTab][selectedDate] || []);
 }
 
-function workoutCurrentDate() {
-  if (workoutDates.length === 0) return today();
-  // clamp offset
-  workoutOffset = Math.max(-(workoutDates.length - 1), Math.min(0, workoutOffset));
-  return workoutDates[workoutDates.length - 1 + workoutOffset];
-}
-
-function rebuildWorkoutDates() {
-  workoutDates = Object.keys(state.workout).filter(k => (state.workout[k] || []).length > 0).sort();
-  if (!workoutDates.includes(today())) {
-    // always include today even if empty
-    workoutDates.push(today());
-    workoutDates.sort();
-  }
-}
-
-// ── mutations ─────────────────────────────────
 function setItems(arr) {
   if (activeTab === 'notes') { state.notes = arr; return; }
-  if (activeTab === 'workout') {
-    const d = workoutCurrentDate();
-    state.workout[d] = arr;
-    return;
-  }
   state[activeTab][selectedDate] = arr;
 }
 
+// ── mutations ─────────────────────────────────
 function addItem(text) {
   if (!text.trim()) return;
   const items = [...currentItems(), { id: uid(), text: text.trim(), done: false }];
   setItems(items);
-  saveState();
-  render();
+  saveState(); render();
 }
 
 function toggleItem(id) {
@@ -126,10 +102,6 @@ const dateNav    = $('dateNav');
 const dateNavDays= $('dateNavDays');
 const datePrev   = $('datePrev');
 const dateNext   = $('dateNext');
-const workoutNav = $('workoutNav');
-const wkPrev     = $('wkPrev');
-const wkNext     = $('wkNext');
-const wkDateLbl  = $('wkDateLabel');
 
 // ── render ────────────────────────────────────
 function render() {
@@ -147,22 +119,27 @@ function render() {
   $('sectionIcon').style.color = cat.color;
   $('sectionName').textContent = cat.label;
 
-  // date label
-  if (activeTab === 'workout') {
-    rebuildWorkoutDates();
-    $('dateLabel').textContent = fmtFull(workoutCurrentDate()).replace(/^./, c => c.toUpperCase());
-  } else if (cat.hasDateNav) {
+  // Видимость даты и календаря
+  if (cat.hasDateNav) {
     $('dateLabel').textContent = fmtFull(selectedDate).replace(/^./, c => c.toUpperCase());
+    $('calendarBtn').style.display = 'block';
   } else {
     $('dateLabel').textContent = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, c => c.toUpperCase());
+    $('calendarBtn').style.display = 'none'; // Скрываем календарь в заметках
+  }
+
+  // Подписи тренировок
+  if (activeTab === 'workout') {
+    $('workoutTitle').classList.add('visible');
+    $('workoutTitle').value = state.workoutTitles[selectedDate] || '';
+    $('workoutTitle').style.color = cat.color;
+  } else {
+    $('workoutTitle').classList.remove('visible');
   }
 
   // nav visibility
   dateNav.classList.toggle('visible', cat.hasDateNav);
-  workoutNav.classList.toggle('visible', cat.hasWorkoutNav);
-
   if (cat.hasDateNav) renderDateNav();
-  if (cat.hasWorkoutNav) renderWorkoutNav();
 
   // items
   const items = currentItems();
@@ -189,7 +166,6 @@ function render() {
     const badge = $('badge-' + tab);
     let count = 0;
     if (tab === 'notes') { count = (state.notes || []).filter(i => !i.done).length; }
-    else if (tab === 'workout') { count = (state.workout[today()] || []).filter(i => !i.done).length; }
     else { count = (state[tab][today()] || []).filter(i => !i.done).length; }
     badge.textContent = count > 0 ? count : '';
     badge.classList.toggle('show', count > 0);
@@ -218,23 +194,20 @@ function buildItem(item, color) {
     div.appendChild(inp);
     setTimeout(() => inp.focus(), 10);
   } else {
-    // check btn
     const cbtn = document.createElement('button');
     cbtn.className = 'check-btn';
     cbtn.innerHTML = `<div class="check-circle${item.done ? ' checked' : ''}">${item.done ? '<span class="check-mark">✓</span>' : ''}</div>`;
     cbtn.addEventListener('click', () => toggleItem(item.id));
 
-    // text
     const span = document.createElement('span');
     span.className = 'item-text';
     span.textContent = item.text;
     span.addEventListener('dblclick', () => { editingId = item.id; render(); });
-    // long press for mobile
+    
     let pressTimer;
     span.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { editingId = item.id; render(); }, 600); });
     span.addEventListener('touchend', () => clearTimeout(pressTimer));
 
-    // delete
     const dbtn = document.createElement('button');
     dbtn.className = 'delete-btn';
     dbtn.textContent = '×';
@@ -250,7 +223,6 @@ function buildItem(item, color) {
 // ── Date nav ──────────────────────────────────
 function renderDateNav() {
   dateNavDays.innerHTML = '';
-  // show a window of days: dateWindowStart to dateWindowStart+13
   const windowSize = 14;
   const t = today();
   for (let i = dateWindowStart; i < dateWindowStart + windowSize; i++) {
@@ -261,7 +233,6 @@ function renderDateNav() {
     const dayNum = parseKey(d).getDate();
     chip.innerHTML = `<span class="dc-wd">${wd}</span><span class="dc-d">${dayNum}</span>`;
 
-    // show dot if has items
     const items = state[activeTab][d];
     if (items && items.filter(i => !i.done).length > 0) {
       chip.innerHTML += `<span class="dc-dot"></span>`;
@@ -270,47 +241,17 @@ function renderDateNav() {
     chip.addEventListener('click', () => { selectedDate = d; render(); });
     dateNavDays.appendChild(chip);
   }
-
-  datePrev.disabled = false;
-  dateNext.disabled = false;
 }
 
 datePrev.addEventListener('click', () => { dateWindowStart -= 7; render(); });
 dateNext.addEventListener('click', () => { dateWindowStart += 7; render(); });
-
-// ── Workout nav ────────────────────────────────
-function renderWorkoutNav() {
-  rebuildWorkoutDates();
-  const cur = workoutCurrentDate();
-  wkDateLbl.textContent = cur === today() ? 'Сегодня — ' + fmtShort(cur) : fmtFull(cur);
-  wkPrev.disabled = workoutOffset <= -(workoutDates.length - 1);
-  wkNext.disabled = workoutOffset >= 0;
-
-  // add new day button if viewing past
-  if (workoutOffset < 0) {
-    wkNext.textContent = 'След. ›';
-  } else {
-    wkNext.textContent = 'Новая ›';
-    wkNext.disabled = true; // can't go forward from today
-  }
-}
-
-wkPrev.addEventListener('click', () => {
-  workoutOffset = Math.max(-(workoutDates.length - 1), workoutOffset - 1);
-  render();
-});
-wkNext.addEventListener('click', () => {
-  if (workoutOffset < 0) workoutOffset++;
-  render();
-});
 
 // ── Nav tabs ──────────────────────────────────
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     activeTab = btn.dataset.tab;
     editingId = null;
-    if (activeTab === 'tasks' || activeTab === 'homework') selectedDate = today();
-    if (activeTab === 'workout') { rebuildWorkoutDates(); workoutOffset = 0; }
+    if (activeTab !== 'notes') { selectedDate = today(); dateWindowStart = -3; }
     render();
   });
 });
@@ -330,6 +271,25 @@ mainInput.addEventListener('keydown', e => {
 
 // ── Clear done ────────────────────────────────
 clearBtn.addEventListener('click', clearDone);
+
+// ── Управление календарем ─────────────────────
+$('calendarBtn').addEventListener('click', () => $('datePicker').showPicker());
+
+$('datePicker').addEventListener('change', (e) => {
+  if (e.target.value) {
+    selectedDate = e.target.value;
+    // Сдвигаем ленту дат, чтобы выбранный день был по центру
+    const diffDays = Math.round((parseKey(selectedDate) - parseKey(today())) / (1000 * 60 * 60 * 24));
+    dateWindowStart = diffDays - 3;
+    render();
+  }
+});
+
+// ── Подпись тренировки ────────────────────────
+$('workoutTitle').addEventListener('input', (e) => {
+  state.workoutTitles[selectedDate] = e.target.value;
+  saveState();
+});
 
 // ── Init ──────────────────────────────────────
 render();
