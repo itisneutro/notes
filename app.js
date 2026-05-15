@@ -117,8 +117,11 @@ function copyWorkoutTo(targetDate){
   const dest=state.workout[targetDate]||[];
   const newItems=src.map(i=>({...i,id:uid(),done:false}));
   state.workout[targetDate]=[...dest,...newItems];
+  
+  // ИСПРАВЛЕНО: Теперь перекидывает на выбранную дату 100%
   rebuildWorkoutDates();
-  workoutOffset=workoutDates.indexOf(targetDate)-( workoutDates.length-1);
+  workoutOffset = workoutDates.indexOf(targetDate) - (workoutDates.length - 1);
+  
   saveState(); render();
   showToast('Тренировка скопирована на '+fmtShort(targetDate));
 }
@@ -216,7 +219,7 @@ function render(){
   document.querySelector('.progress-ring').style.stroke=cat.color;
   document.querySelector('.progress-pct').style.color=cat.color;
   document.querySelector('.add-btn').style.background=cat.color;
-  document.querySelector('.add-btn').style.boxShadow=`0 4px 14px ${cat.color}55`;
+  document.querySelector('.add-btn').style.boxShadow=`0 4px 14px color-mix(in srgb, ${cat.color} 40%, transparent)`;
   document.documentElement.style.setProperty('--accent',cat.color);
 
   document.getElementById('sectionIcon').textContent=cat.icon;
@@ -276,7 +279,6 @@ function renderListOnly(){
   attachDrag(itemList);
 }
 
-// ── ИСПРАВЛЕННЫЙ BUILD ITEM (ТУТ БЫЛА ОШИБКА) ──
 function buildItem(item,cat){
   const div=document.createElement('div');
   div.className='item'+(item.done?' done':'');
@@ -427,6 +429,17 @@ modalClose.addEventListener('click',()=>calModal.classList.remove('open'));
 calModal.addEventListener('click',e=>{if(e.target===calModal)calModal.classList.remove('open');});
 modalPrevM.addEventListener('click',()=>{modalMonth--;if(modalMonth<0){modalMonth=11;modalYear--;}renderModal();});
 modalNextM.addEventListener('click',()=>{modalMonth++;if(modalMonth>11){modalMonth=0;modalYear++;}renderModal();});
+
+// ИСПРАВЛЕНО: Обработчик для кнопки Сегодня
+const modalTodayBtn = document.getElementById('modalTodayBtn');
+if(modalTodayBtn) {
+  modalTodayBtn.addEventListener('click', () => {
+    selectedDate = today();
+    dateWinStart = -3;
+    calModal.classList.remove('open');
+    render();
+  });
+}
 
 function renderModal(){
   const d=new Date(modalYear,modalMonth,1);
