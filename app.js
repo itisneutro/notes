@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────
-//  MyNotes PWA — app.js  v3
+//  MyNotes PWA — app.js  v4 (Fixed)
 // ─────────────────────────────────────────
 
-const STORAGE_KEY = 'mynotes_v4';
+const STORAGE_KEY = 'mynotes_v6'; // Повысили версию для чистого кэша
 const CATS = {
   tasks:    { label:'Задачи',     icon:'✦', color:'#FF6B35', hasDateNav:true,  hasWorkoutNav:false },
   workout:  { label:'Тренировка', icon:'◈', color:'#00D4AA', hasDateNav:false, hasWorkoutNav:true  },
@@ -114,13 +114,10 @@ function moveToTomorrow(id){
 function copyWorkoutTo(targetDate){
   const src=state.workout[wkDate()]||[];
   if(!src.length){ showToast('Тренировка пустая'); return; }
-  // don't overwrite if target already has items — append unique
   const dest=state.workout[targetDate]||[];
   const newItems=src.map(i=>({...i,id:uid(),done:false}));
   state.workout[targetDate]=[...dest,...newItems];
-  // rebuild dates
   rebuildWorkoutDates();
-  // switch view to target
   workoutOffset=workoutDates.indexOf(targetDate)-( workoutDates.length-1);
   saveState(); render();
   showToast('Тренировка скопирована на '+fmtShort(targetDate));
@@ -132,14 +129,12 @@ let dragSrcIdx = null;
 function attachDrag(listEl){
   let touchStartY=0, touchItem=null, touchIdx=null, clone=null;
 
-  // pointer/touch drag
   listEl.addEventListener('touchstart', e=>{
     const item=e.target.closest('.item');
     if(!item||e.target.closest('.act-btn')||e.target.closest('.check-btn')) return;
     touchItem=item;
     touchIdx=[...listEl.children].filter(c=>c.classList.contains('item')).indexOf(item);
     touchStartY=e.touches[0].clientY;
-    // create visual clone
     const rect=item.getBoundingClientRect();
     clone=item.cloneNode(true);
     clone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.75;z-index:999;pointer-events:none;transition:none;transform:scale(1.02);box-shadow:0 10px 30px rgba(0,0,0,0.5);`;
@@ -152,7 +147,6 @@ function attachDrag(listEl){
     e.preventDefault();
     const dy=e.touches[0].clientY-touchStartY;
     clone.style.transform=`translateY(${dy}px) scale(1.02)`;
-    // find drop target
     const y=e.touches[0].clientY;
     const items=[...listEl.children].filter(c=>c.classList.contains('item'));
     let newIdx=touchIdx;
@@ -167,9 +161,7 @@ function attachDrag(listEl){
       setItems(arr);
       touchIdx=newIdx;
       saveState();
-      // re-render list only (no full render to avoid flicker)
       renderListOnly();
-      // re-attach since DOM changed
       attachDrag(listEl);
     }
   },{passive:false});
@@ -208,8 +200,6 @@ const wkPrev       = document.getElementById('wkPrev');
 const wkNext       = document.getElementById('wkNext');
 const wkDateLbl    = document.getElementById('wkDateLabel');
 const wkCopyBar    = document.getElementById('workoutCopyBar');
-const wkCopyToday  = document.getElementById('wkCopyToday');
-const wkCopyTomorrow=document.getElementById('wkCopyTomorrow');
 const calIconBtn   = document.getElementById('calIconBtn');
 const calModal     = document.getElementById('calModal');
 const modalClose   = document.getElementById('modalClose');
@@ -222,15 +212,13 @@ const modalDays    = document.getElementById('modalDays');
 function render(){
   const cat=CATS[activeTab];
 
-  // accent
-  document.querySelectorAll('.blob-1,.blob-2').forEach(b=>b.style.background=cat.color);
+  document.querySelectorAll('.blob-1,.blob-2,.blob-3').forEach(b=>b.style.background=cat.color);
   document.querySelector('.progress-ring').style.stroke=cat.color;
   document.querySelector('.progress-pct').style.color=cat.color;
   document.querySelector('.add-btn').style.background=cat.color;
   document.querySelector('.add-btn').style.boxShadow=`0 4px 14px ${cat.color}55`;
   document.documentElement.style.setProperty('--accent',cat.color);
 
-  // header
   document.getElementById('sectionIcon').textContent=cat.icon;
   document.getElementById('sectionIcon').style.color=cat.color;
   document.getElementById('sectionName').textContent=cat.label;
@@ -238,25 +226,21 @@ function render(){
   const dispDate=activeTab==='workout'?wkDate():(cat.hasDateNav?selectedDate:today());
   document.getElementById('dateLabel').textContent=fmtFull(dispDate).replace(/^./,c=>c.toUpperCase());
 
-  // cal icon button visibility
   calIconBtn.classList.toggle('hidden',!cat.hasDateNav);
 
-  // navs
   dateNav.classList.toggle('visible',cat.hasDateNav);
   workoutNav.classList.toggle('visible',cat.hasWorkoutNav);
-  wkCopyBar.classList.toggle('visible',cat.hasWorkoutNav);
+  if(wkCopyBar) wkCopyBar.classList.toggle('visible',cat.hasWorkoutNav);
 
   if(cat.hasDateNav)    renderDateNav();
   if(cat.hasWorkoutNav) renderWorkoutNav();
 
-  // stats
   const items=currentItems();
   const done=items.filter(i=>i.done).length;
   document.getElementById('statActive').textContent=items.length-done;
   document.getElementById('statDone').textContent=done;
   clearBtn.classList.toggle('visible',done>0);
 
-  // progress (r=19 → circ≈119.4)
   const circ=2*Math.PI*19;
   const pct=items.length?Math.round((done/items.length)*100):0;
   const ring=document.querySelector('.progress-ring');
@@ -266,7 +250,6 @@ function render(){
 
   renderListOnly();
 
-  // badges
   Object.keys(CATS).forEach(tab=>{
     const badge=document.getElementById('badge-'+tab);
     let count=0;
@@ -293,6 +276,7 @@ function renderListOnly(){
   attachDrag(itemList);
 }
 
+// ── ИСПРАВЛЕННЫЙ BUILD ITEM (ТУТ БЫЛА ОШИБКА) ──
 function buildItem(item,cat){
   const div=document.createElement('div');
   div.className='item'+(item.done?' done':'');
@@ -308,13 +292,11 @@ function buildItem(item,cat){
     return div;
   }
 
-// check
   const cbtn=document.createElement('button');
   cbtn.className='check-btn';
   cbtn.innerHTML=`<div class="check-circle${item.done?' checked':''}">${item.done?'<span class="check-mark">✓</span>':''}</div>`;
   cbtn.addEventListener('click', () => toggleItem(item.id));
 
-  // text
   const span=document.createElement('span');
   span.className='item-text'; span.textContent=item.text;
   let pressTimer, moved=false;
@@ -323,7 +305,6 @@ function buildItem(item,cat){
   span.addEventListener('touchend',()=>clearTimeout(pressTimer),{passive:true});
   span.addEventListener('dblclick',()=>{editingId=item.id;render();});
 
-  // actions
   const actions=document.createElement('div');
   actions.className='item-actions';
 
@@ -385,8 +366,7 @@ function renderWorkoutNav(){
 wkPrev.addEventListener('click',()=>{workoutOffset=Math.max(-(workoutDates.length-1),workoutOffset-1);render();});
 wkNext.addEventListener('click',()=>{if(workoutOffset<0)workoutOffset++;render();});
 
-// workout copy-all
-// workout copy — date picker
+// ── Workout date-pick modal ───────────────────
 let wkPickYear = new Date().getFullYear();
 let wkPickMonth = new Date().getMonth();
 
@@ -396,17 +376,20 @@ const wkPickNext    = document.getElementById('wkPickNext');
 const wkPickMonthEl = document.getElementById('wkPickMonth');
 const wkPickDaysEl  = document.getElementById('wkPickDays');
 const wkPickCancel  = document.getElementById('wkPickCancel');
+const wkCopyPickBtn = document.getElementById('wkCopyPick');
 
-document.getElementById('wkCopyPick').addEventListener('click', () => {
-  wkPickYear  = new Date().getFullYear();
-  wkPickMonth = new Date().getMonth();
-  renderWkPick();
-  wkPickModal.classList.add('open');
-});
-wkPickCancel.addEventListener('click', () => wkPickModal.classList.remove('open'));
-wkPickModal.addEventListener('click', e => { if(e.target===wkPickModal) wkPickModal.classList.remove('open'); });
-wkPickPrev.addEventListener('click', () => { wkPickMonth--; if(wkPickMonth<0){wkPickMonth=11;wkPickYear--;} renderWkPick(); });
-wkPickNext.addEventListener('click', () => { wkPickMonth++; if(wkPickMonth>11){wkPickMonth=0;wkPickYear++;} renderWkPick(); });
+if(wkCopyPickBtn) {
+  wkCopyPickBtn.addEventListener('click', () => {
+    wkPickYear  = new Date().getFullYear();
+    wkPickMonth = new Date().getMonth();
+    renderWkPick();
+    wkPickModal.classList.add('open');
+  });
+}
+if(wkPickCancel) wkPickCancel.addEventListener('click', () => wkPickModal.classList.remove('open'));
+if(wkPickModal) wkPickModal.addEventListener('click', e => { if(e.target===wkPickModal) wkPickModal.classList.remove('open'); });
+if(wkPickPrev) wkPickPrev.addEventListener('click', () => { wkPickMonth--; if(wkPickMonth<0){wkPickMonth=11;wkPickYear--;} renderWkPick(); });
+if(wkPickNext) wkPickNext.addEventListener('click', () => { wkPickMonth++; if(wkPickMonth>11){wkPickMonth=0;wkPickYear++;} renderWkPick(); });
 
 function renderWkPick() {
   const d = new Date(wkPickYear, wkPickMonth, 1);
@@ -450,8 +433,7 @@ function renderModal(){
   modalTitle.textContent=fmtMonthYear(d).replace(/^./,c=>c.toUpperCase());
   modalDays.innerHTML='';
   const t=today();
-  // offset: Monday=0
-  let startDow=(d.getDay()+6)%7; // Mon=0
+  let startDow=(d.getDay()+6)%7; 
   for(let i=0;i<startDow;i++){
     const emp=document.createElement('button'); emp.className='modal-day empty'; emp.disabled=true;
     modalDays.appendChild(emp);
@@ -469,7 +451,7 @@ function renderModal(){
     btn.addEventListener('click',()=>{
       selectedDate=k;
       calModal.classList.remove('open');
-      dateWinStart=-3; // re-center strip
+      dateWinStart=-3; 
       render();
     });
     modalDays.appendChild(btn);
