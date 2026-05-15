@@ -308,16 +308,11 @@ function buildItem(item,cat){
     return div;
   }
 
-  // check
+// check
   const cbtn=document.createElement('button');
   cbtn.className='check-btn';
   cbtn.innerHTML=`<div class="check-circle${item.done?' checked':''}">${item.done?'<span class="check-mark">✓</span>':''}</div>`;
-btn.addEventListener('click', () => {
-  selectedDate = k;
-  dateWinStart = -3;
-  calModal.classList.remove('open');
-  render();
-});
+  cbtn.addEventListener('click', () => toggleItem(item.id));
 
   // text
   const span=document.createElement('span');
