@@ -391,8 +391,52 @@ wkPrev.addEventListener('click',()=>{workoutOffset=Math.max(-(workoutDates.lengt
 wkNext.addEventListener('click',()=>{if(workoutOffset<0)workoutOffset++;render();});
 
 // workout copy-all
-wkCopyToday.addEventListener('click',()=>copyWorkoutTo(today()));
-wkCopyTomorrow.addEventListener('click',()=>copyWorkoutTo(addDays(today(),1)));
+// workout copy — date picker
+let wkPickYear = new Date().getFullYear();
+let wkPickMonth = new Date().getMonth();
+
+const wkPickModal   = document.getElementById('wkPickModal');
+const wkPickPrev    = document.getElementById('wkPickPrev');
+const wkPickNext    = document.getElementById('wkPickNext');
+const wkPickMonthEl = document.getElementById('wkPickMonth');
+const wkPickDaysEl  = document.getElementById('wkPickDays');
+const wkPickCancel  = document.getElementById('wkPickCancel');
+
+document.getElementById('wkCopyPick').addEventListener('click', () => {
+  wkPickYear  = new Date().getFullYear();
+  wkPickMonth = new Date().getMonth();
+  renderWkPick();
+  wkPickModal.classList.add('open');
+});
+wkPickCancel.addEventListener('click', () => wkPickModal.classList.remove('open'));
+wkPickModal.addEventListener('click', e => { if(e.target===wkPickModal) wkPickModal.classList.remove('open'); });
+wkPickPrev.addEventListener('click', () => { wkPickMonth--; if(wkPickMonth<0){wkPickMonth=11;wkPickYear--;} renderWkPick(); });
+wkPickNext.addEventListener('click', () => { wkPickMonth++; if(wkPickMonth>11){wkPickMonth=0;wkPickYear++;} renderWkPick(); });
+
+function renderWkPick() {
+  const d = new Date(wkPickYear, wkPickMonth, 1);
+  wkPickMonthEl.textContent = fmtMonthYear(d).replace(/^./, c => c.toUpperCase());
+  wkPickDaysEl.innerHTML = '';
+  const startDow = (d.getDay()+6)%7;
+  for(let i=0;i<startDow;i++){
+    const e=document.createElement('button'); e.className='wk-pick-day empty'; e.disabled=true; wkPickDaysEl.appendChild(e);
+  }
+  const daysInMonth = new Date(wkPickYear, wkPickMonth+1, 0).getDate();
+  const t = today();
+  for(let day=1;day<=daysInMonth;day++){
+    const k = toKey(new Date(wkPickYear, wkPickMonth, day));
+    const btn = document.createElement('button');
+    btn.className = 'wk-pick-day';
+    if(k===t) btn.classList.add('today');
+    if((state.workout[k]||[]).length>0) btn.classList.add('has-workout');
+    btn.textContent = day;
+    btn.addEventListener('click', () => {
+      copyWorkoutTo(k);
+      wkPickModal.classList.remove('open');
+    });
+    wkPickDaysEl.appendChild(btn);
+  }
+}
 
 // ── Calendar modal ────────────────────────────
 calIconBtn.addEventListener('click',()=>{
