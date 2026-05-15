@@ -298,3 +298,39 @@ $('workoutTitle').addEventListener('input', (e) => {
 
 // ── Init ──────────────────────────────────────
 render();
+
+// ── LIQUID GLASS LOGIC (Свайп меню) ──
+function updateGlider() {
+  const tabsList = ['tasks', 'workout', 'homework', 'notes'];
+  const index = tabsList.indexOf(activeTab);
+  const glider = document.getElementById('navGlider');
+  if (glider) {
+    glider.style.transform = `translateX(${index * 100}%)`;
+  }
+}
+
+// Добавляем вызов ползунка в конец функции render
+const originalRender = render;
+render = function() {
+  originalRender();
+  updateGlider();
+};
+
+// Свайп по нижнему меню (водишь пальцем - вкладки переключаются)
+const bNav = document.querySelector('.bottom-nav');
+if (bNav) {
+  bNav.addEventListener('touchmove', (e) => {
+    e.preventDefault(); 
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el) return;
+    
+    const tabBtn = el.closest('.nav-item');
+    if (tabBtn) {
+      const newTab = tabBtn.dataset.tab;
+      if (activeTab !== newTab) {
+        tabBtn.click(); // Имитируем нажатие
+      }
+    }
+  }, { passive: false });
+}
