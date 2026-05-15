@@ -29,25 +29,6 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
 /* ══ LIQUID GLASS helper ══
    Works by combining a semi-transparent bg + backdrop-filter.
    The "shine" is an ::before pseudo inset gradient.         */
-.glass-panel {
-  background: rgba(255,255,255,0.07);
-  /* Safari needs -webkit- prefix */
-  -webkit-backdrop-filter: blur(32px) saturate(1.8);
-  backdrop-filter: blur(32px) saturate(1.8);
-  border: 1px solid rgba(255,255,255,0.13);
-  box-shadow:
-    inset 0 1.5px 0 rgba(255,255,255,0.20),
-    inset 0 -1px 0 rgba(0,0,0,0.12),
-    0 8px 32px rgba(0,0,0,0.45);
-  position: relative;
-}
-.glass-panel::before {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(160deg, rgba(255,255,255,0.10) 0%, transparent 55%);
-  pointer-events: none;
-}
 
 /* ══ HEADER ══ */
 .header {
@@ -58,6 +39,14 @@ html, body { height: 100%; background: var(--bg); overflow: hidden; }
   border-radius: 22px;
   padding: 12px 14px 10px;
   margin-bottom: 8px;
+  background: rgba(255,255,255,0.07);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  backdrop-filter: blur(32px) saturate(1.8);
+  border: 1px solid rgba(255,255,255,0.13);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 8px 32px rgba(0,0,0,0.4);
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
 .header-left {}
