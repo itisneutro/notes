@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0D0D12" />
+  <meta name="theme-color" content="#080810" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="MyNotes" />
@@ -16,90 +16,98 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+<div id="app">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
 
-    <!-- HEADER -->
-    <header class="header">
+  <!-- HEADER (glass card) -->
+  <header class="header">
+    <div class="header-glass">
       <div class="header-top">
-        <div class="header-left">
-          <div class="date-wrapper" id="dateWrapper">
-            <div class="date-label" id="dateLabel"></div>
-            <div class="calendar-container" id="calendarContainer">
-              <span class="calendar-icon">📅</span>
-              <input type="date" id="datePicker" class="date-picker-overlay" />
-            </div>
-          </div>
+        <div>
+          <div class="date-label" id="dateLabel"></div>
           <div class="section-title">
             <span class="section-icon" id="sectionIcon"></span>
             <span id="sectionName"></span>
           </div>
-          <input type="text" id="workoutTitle" class="workout-title-input" placeholder="Название дня (напр. Спина/Грудь)..." />
         </div>
         <div class="progress-wrap">
-          <svg class="progress-svg" viewBox="0 0 52 52">
-            <circle class="progress-bg" cx="26" cy="26" r="21"/>
-            <circle class="progress-ring" id="progressRing" cx="26" cy="26" r="21"/>
+          <svg class="progress-svg" viewBox="0 0 46 46">
+            <circle class="progress-bg" cx="23" cy="23" r="19"/>
+            <circle class="progress-ring" id="progressRing" cx="23" cy="23" r="19"/>
           </svg>
           <span class="progress-pct" id="progressPct">0%</span>
         </div>
       </div>
 
+      <!-- Calendar date nav (tasks / homework) -->
       <div class="date-nav" id="dateNav">
-        <button class="date-nav-arrow" id="datePrev">‹</button>
-        <div class="date-nav-days" id="dateNavDays"></div>
-        <button class="date-nav-arrow" id="dateNext">›</button>
+        <div class="cal-month" id="calMonth"></div>
+        <div class="date-nav-row">
+          <button class="date-nav-arrow" id="datePrev">‹</button>
+          <div class="date-nav-days" id="dateNavDays"></div>
+          <button class="date-nav-arrow" id="dateNext">›</button>
+        </div>
       </div>
-    </header>
-    
-    <!-- STATS BAR -->
-    <div class="stats-bar">
-      <span class="stat"><span class="dot dot-active">●</span> <span id="statActive">0</span> активных</span>
-      <span class="stat-div"></span>
-      <span class="stat"><span class="dot dot-done">●</span> <span id="statDone">0</span> выполнено</span>
-      <button class="clear-btn" id="clearDoneBtn">очистить ✕</button>
+
+      <!-- Workout history nav -->
+      <div class="workout-nav" id="workoutNav">
+        <button class="wk-nav-btn" id="wkPrev">‹ Пред.</button>
+        <span class="wk-date-label" id="wkDateLabel"></span>
+        <button class="wk-nav-btn" id="wkNext">След. ›</button>
+      </div>
     </div>
+  </header>
 
-    <!-- LIST -->
-    <div class="list" id="itemList"></div>
-
-    <!-- INPUT -->
-<div class="input-row">
-      <input class="main-input" id="mainInput" placeholder="Добавить..." />
-      <button class="add-btn" id="addBtn">+</button>
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <nav class="bottom-nav">
-      <button class="nav-item" data-tab="tasks">
-        <span class="nav-icon">✦</span>
-        <span class="nav-label">Задачи</span>
-        <span class="nav-badge" id="badge-tasks"></span>
-      </button>
-      <button class="nav-item" data-tab="workout">
-        <span class="nav-icon">◈</span>
-        <span class="nav-label">Тренировка</span>
-        <span class="nav-badge" id="badge-workout"></span>
-      </button>
-      <button class="nav-item" data-tab="homework">
-        <span class="nav-icon">◆</span>
-        <span class="nav-label">Домашка</span>
-        <span class="nav-badge" id="badge-homework"></span>
-      </button>
-      <button class="nav-item" data-tab="notes">
-        <span class="nav-icon">◇</span>
-        <span class="nav-label">Заметки</span>
-        <span class="nav-badge" id="badge-notes"></span>
-      </button>
-    </nav>
+  <!-- STATS -->
+  <div class="stats-bar">
+    <span class="stat"><span class="dot dot-active">●</span> <span id="statActive">0</span> активных</span>
+    <span class="stat-div"></span>
+    <span class="stat"><span class="dot dot-done">●</span> <span id="statDone">0</span> выполнено</span>
+    <button class="clear-btn" id="clearDoneBtn">очистить ✕</button>
   </div>
 
-  <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
+  <!-- LIST -->
+  <div class="list" id="itemList"></div>
+
+  <!-- INPUT -->
+  <div class="input-row">
+    <input class="main-input" id="mainInput" placeholder="Добавить..." />
+    <button class="add-btn" id="addBtn">+</button>
+  </div>
+
+  <!-- BOTTOM NAV (liquid glass) -->
+  <nav class="bottom-nav">
+    <button class="nav-item" data-tab="tasks">
+      <span class="nav-icon">✦</span>
+      <span class="nav-label">Задачи</span>
+      <span class="nav-badge" id="badge-tasks"></span>
+    </button>
+    <button class="nav-item" data-tab="workout">
+      <span class="nav-icon">◈</span>
+      <span class="nav-label">Тренировка</span>
+      <span class="nav-badge" id="badge-workout"></span>
+    </button>
+    <button class="nav-item" data-tab="homework">
+      <span class="nav-icon">◆</span>
+      <span class="nav-label">Домашка</span>
+      <span class="nav-badge" id="badge-homework"></span>
+    </button>
+    <button class="nav-item" data-tab="notes">
+      <span class="nav-icon">◇</span>
+      <span class="nav-label">Заметки</span>
+      <span class="nav-badge" id="badge-notes"></span>
+    </button>
+  </nav>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
 </body>
 </html>
